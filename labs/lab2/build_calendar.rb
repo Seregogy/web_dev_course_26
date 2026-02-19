@@ -17,17 +17,23 @@ def parse_teams(file_path)
   }
 end
 
+def generate_calendar(teams, begin_date, end_date)
+  generate_dates_in_range(begin_date, end_date).map { |day|
+    
+  }
+end
+
 def generate_dates_in_range(begin_date, end_date)
   if end_date - begin_date <= 0
     raise "Дата начала раньше даты конца"
   end
 
   result = Array.new()
-  neccessery_days_of_week_indexes = [0, 5, 6]
+  necessary_days_of_week_indexes = [0, 5, 6]
   current_date = begin_date
 
   while current_date.wday != 0
-    if neccessery_days_of_week_indexes.include?(current_date.wday)
+    if necessary_days_of_week_indexes.include?(current_date.wday)
       result << current_date
     end
 
@@ -40,12 +46,6 @@ def generate_dates_in_range(begin_date, end_date)
   end
 
   result
-end
-
-def generate_calendar(teams, begin_date, end_date)
-  generate_dates_in_range(begin_date, end_date).map { |day|
-    
-  }
 end
 
 if ARGV.length != 4
