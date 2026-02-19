@@ -1,9 +1,0 @@
-{
-  "name": "Alice",
-  "age": 30,
-  "isStudent": false,
-  "hobbies": [
-    "coding",
-    "reading"
-  ]
-}
