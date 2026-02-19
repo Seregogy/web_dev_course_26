@@ -1,25 +1,59 @@
 require 'date'
-require 'json'
-
-Struct.new("Team", :id, :name, :city, :played_teams)
-
-def parse_teams(file_path)
-  File.readlines(file_path).map { |line|
-    splitted_outer = line.split('.')
-    splitted_inner = splitted_outer[1].split('—').map { |i| i.strip}
-
-    Struct::Team.new(
-      splitted_outer[0].to_i,
-      splitted_inner[0].strip,
-      splitted_inner[1].strip,
-      Array.new()
-    )
-  }
-end
+require 'set'
+require_relative 'parser.rb'
+require_relative 'writer.rb'
 
 def generate_calendar(teams, begin_date, end_date)
-  generate_dates_in_range(begin_date, end_date).map { |day|
-    
+  Struct.new("Rule", :condition, :stategy, :shift)
+  
+  combinations = generate_combinations(teams.length).to_a
+  dates = generate_dates_in_range(begin_date, end_date)
+
+  rules = [
+    Struct::Rule.new(
+      condition: -> (combinations, dates) { 
+        combinations.length / 3 > dates.length 
+      },
+      stategy: -> (offset, combinations, date) {
+        { date => combinations.drop(offset * 3).first(3) }
+      },
+      shift: 3
+    ),
+    Struct::Rule.new(
+      condition: -> (combinations, dates) { 
+        combinations.length / 2 > dates.length 
+      },
+      stategy: -> (offset, combinations, date) {
+        { date => combinations.drop(offset * 2).first(2) }
+      },
+      shift: 2
+    ),
+    Struct::Rule.new(
+      condition: -> (combinations, dates) { 
+        combinations.length > dates.length 
+      },
+      stategy: -> (offset, combinations, date) {
+        { date => combinations[offset] }
+      },
+      shift: 1
+    ),
+    Struct::Rule.new(
+      condition: -> (combinations, dates) { true },
+      stategy: -> (offset, combinations, date) {
+        { date => [combinations[offset % combinations.length]] }
+      },
+      shift: 1
+    )
+  ]
+
+  rule = rules.find { |rule| rule.condition.call(combinations, dates) == true }
+  strategy = rule[1]
+  step = rule[2]
+
+  dates.map.with_index { |date, index|
+    if index % step == 0
+      strategy.call(index, combinations, date)
+    end
   }
 end
 
@@ -48,6 +82,21 @@ def generate_dates_in_range(begin_date, end_date)
   result
 end
 
+def generate_combinations(teams_amount) 
+  set = Set.new()
+  for i in 1..teams_amount do
+    for j in 1..teams_amount do 
+      if i == j
+        next 
+      end
+      
+      set.add([i, j].sort)
+    end
+  end
+
+  set
+end
+
 if ARGV.length != 4
   raise "Не хватает аргументов"
 end
@@ -60,4 +109,4 @@ ending_date = Date.strptime(ARGV[2], '%d.%m.%Y')
 # puts begining_date
 # puts ending_date
 
-generate_calendar(total_teams, begining_date, ending_date)
+puts generate_calendar(total_teams, begining_date, ending_date)
