@@ -19,11 +19,10 @@ class CreditCardPayment < PaymentStrategy
   def initialize(card_number)
     @card_number = card_number
   end
-  
-  # TODO: Implement pay method
+
   # Return "Paid $#{amount} using Credit Card ending in #{last_4_digits}"
   def pay(amount)
-    nil
+    "Paid $#{amount} using Credit Card ending in #{last_4_digits}"
   end
   
   private
@@ -38,10 +37,9 @@ class PayPalPayment < PaymentStrategy
     @email = email
   end
   
-  # TODO: Implement pay method
   # Return "Paid $#{amount} using PayPal account #{email}"
   def pay(amount)
-    nil
+    "Paid $#{amount} using PayPal account #{email}"
   end
 end
 
@@ -50,10 +48,9 @@ class CryptoPayment < PaymentStrategy
     @wallet_address = wallet_address
   end
   
-  # TODO: Implement pay method
   # Return "Paid $#{amount} using Crypto wallet #{wallet_address}"
   def pay(amount)
-    nil
+    "Paid $#{amount} using Crypto wallet #{wallet_address}"
   end
 end
 
@@ -67,20 +64,28 @@ class ShoppingCart
     @items << { name: name, price: price }
   end
   
-  # TODO: Implement set_payment_strategy method
   def set_payment_strategy(strategy)
-    nil
+    @payment_strategy = strategy
   end
   
   def total
-    @items.sum { |item| item[:price] }
+    @items.sum { |item| 
+      item[:price] 
+    }
   end
   
-  # TODO: Implement checkout method
   # Use the payment strategy to process payment
   # Return the result from payment strategy's pay method
   def checkout
-    nil
+    result = ""
+    
+    @items.each.with_index { |item, index|
+      result << "Paymend #{index + 1}: #{@payment_strategy.pay(item[:price])}\n"
+    }
+    result << "Total: $#{total.to_s}\n"
+    
+    puts result
+    result
   end
 end
 
@@ -99,7 +104,13 @@ class BubbleSort
   # TODO: Implement bubble sort
   # Return sorted array (ascending order)
   def sort(array)
-    nil
+    for i in 0...array.size do 
+      for j in 0...array.size do
+        if (array[i] > array[j])
+          array[i], array[j] = array[j], array[i]
+        end
+      end
+    end
   end
 end
 
@@ -229,7 +240,7 @@ def run_tests
     cart.add_item("Mouse", 25)
     cart.set_payment_strategy(PayPalPayment.new("user@example.com"))
     result = cart.checkout
-    
+
     if result.include?("25") && result.include?("user@example.com")
       tests_passed += 1
       puts "✓ Test 2 passed: PayPal payment works"
@@ -248,6 +259,8 @@ def run_tests
     cart.set_payment_strategy(CryptoPayment.new("0x1234abcd"))
     result = cart.checkout
     
+    puts result
+
     if result.include?("50") && result.include?("0x1234abcd")
       tests_passed += 1
       puts "✓ Test 3 passed: Crypto payment works"
