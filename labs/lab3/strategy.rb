@@ -39,7 +39,7 @@ class PayPalPayment < PaymentStrategy
   
   # Return "Paid $#{amount} using PayPal account #{email}"
   def pay(amount)
-    "Paid $#{amount} using PayPal account #{email}"
+    "Paid $#{amount} using PayPal account #{@email}"
   end
 end
 
@@ -50,7 +50,7 @@ class CryptoPayment < PaymentStrategy
   
   # Return "Paid $#{amount} using Crypto wallet #{wallet_address}"
   def pay(amount)
-    "Paid $#{amount} using Crypto wallet #{wallet_address}"
+    "Paid $#{amount} using Crypto wallet #{@wallet_address}"
   end
 end
 
@@ -80,11 +80,10 @@ class ShoppingCart
     result = ""
     
     @items.each.with_index { |item, index|
-      result << "Paymend #{index + 1}: #{@payment_strategy.pay(item[:price])}\n"
+      result << "Payment #{index + 1}: #{@payment_strategy.pay(item[:price])}\n"
     }
     result << "Total: $#{total.to_s}\n"
-    
-    puts result
+
     result
   end
 end
@@ -101,36 +100,41 @@ end
 class BubbleSort
   include SortStrategy
   
-  # TODO: Implement bubble sort
-  # Return sorted array (ascending order)
-  def sort(array)
-    for i in 0...array.size do 
-      for j in 0...array.size do
-        if (array[i] > array[j])
-          array[i], array[j] = array[j], array[i]
+  def sort(arr)
+    n = arr.size
+    for i in 0...n
+      for j in 0...(n - i - 1)
+        if arr[j] > arr[j + 1]
+          arr[j], arr[j + 1] = arr[j + 1], arr[j]
         end
       end
     end
+    arr
   end
 end
 
 class QuickSort
   include SortStrategy
-  
-  # TODO: Implement quick sort or use Ruby's built-in sort
-  # Return sorted array (ascending order)
-  def sort(array)
-    nil
+
+  def sort(arr)
+    return arr if arr.size <= 1
+
+    pivot = arr[arr.size / 2]
+    
+    left  = arr.select { |x| x < pivot }
+    mid   = arr.select { |x| x == pivot }
+    right = arr.select { |x| x > pivot }
+
+    sort(left) + mid + sort(right)
   end
 end
 
 class ReverseSort
   include SortStrategy
   
-  # TODO: Implement reverse sort
   # Return sorted array (descending order)
-  def sort(array)
-    nil
+  def sort(arr)
+    arr.sort!.reverse!
   end
 end
 
@@ -139,15 +143,13 @@ class DataProcessor
     @sort_strategy = sort_strategy
   end
   
-  # TODO: Implement set_strategy method
   def set_strategy(strategy)
-    nil
+    @sort_strategy = strategy
   end
   
-  # TODO: Implement process method
   # Use the sort strategy to sort the data
   def process(data)
-    nil
+    @sort_strategy.sort(data)
   end
 end
 
@@ -161,26 +163,23 @@ class CompressionStrategy
 end
 
 class ZipCompression < CompressionStrategy
-  # TODO: Implement compress method
   # Return "ZIP compressed: #{data}"
   def compress(data)
-    nil
+    "ZIP compressed: #{data}"
   end
 end
 
 class RarCompression < CompressionStrategy
-  # TODO: Implement compress method
   # Return "RAR compressed: #{data}"
   def compress(data)
-    nil
+    "RAR compressed: #{data}"
   end
 end
 
 class NoCompression < CompressionStrategy
-  # TODO: Implement compress method
   # Return "Not compressed: #{data}"
   def compress(data)
-    nil
+    "Not compressed: #{data}"
   end
 end
 
@@ -191,15 +190,14 @@ class FileHandler
     @compression_strategy = compression_strategy
   end
   
-  # TODO: Implement set_compression method
   def set_compression(strategy)
-    nil
+    @compression_strategy = strategy
   end
   
   # TODO: Implement save_file method
   # Compress data using the strategy and return result
   def save_file(data)
-    nil
+    @compression_strategy.compress(data)
   end
 end
 
@@ -258,8 +256,6 @@ def run_tests
     cart.add_item("Keyboard", 50)
     cart.set_payment_strategy(CryptoPayment.new("0x1234abcd"))
     result = cart.checkout
-    
-    puts result
 
     if result.include?("50") && result.include?("0x1234abcd")
       tests_passed += 1
